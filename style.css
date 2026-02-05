@@ -1,0 +1,118 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #8eb2c0;
+}
+
+/* Layout utama */
+.layouts {
+  max-width: 476px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #8eb2c0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #5e5ce0;
+  padding: 16px;
+  text-align: center;
+}
+
+.navbar h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Items */
+.items {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px;
+}
+
+.item {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.item-all {
+  grid-column: span 3;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #5e5ce0;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.item-image {
+  width: 90px;
+  margin: 8px auto;
+  display: block;
+}
+
+.item p {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Button */
+.item-submit {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #5e5ce0;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.item-submit:hover {
+  background-color: #4a48c8;
+}
+
+/* Sidebar / Bottom Nav */
+.sidebar {
+  background-color: #5e5ce0;
+}
+
+.sidebar ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+}
+
+.sidebar ul li a {
+  color: #ffffff;
+  font-size: 22px;
+  text-decoration: none;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar ul li a:hover {
+  transform: scale(1.1);
+  color: #e0e0ff;
+}
