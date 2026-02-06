@@ -1,57 +1,50 @@
 const BASE_URL = "http://192.168.1.5";
-
-let allState = false;
-
 const lamps = ["dapur", "kamar", "tamu", "toilet", "teras", "gudang"];
 
+/* =========================
+   TOGGLE ALL LAMPU
+========================= */
 function toggleAll() {
-  allState = !allState;
+  fetch(`${BASE_URL}/${lamps[0]}`)
+    .then(res => res.text())
+    .then(state => {
+      const turnOn = state.trim() === "OFF";
 
-  // kirim ke ESP
-  lamps.forEach(lamp => postTo(lamp));
+      lamps.forEach(lamp => {
+        fetch(`${BASE_URL}/${lamp}`, { method: "POST" });
+      });
 
-  // update UI lampu
-  lamps.forEach(lamp => {
-    const btn = document.getElementById(`btn-${lamp}`);
-    const img = document.getElementById(`img-${lamp}`);
-
-    if (!btn || !img) return;
-
-    btn.textContent = allState ? "HIDUP" : "MATI";
-    btn.style.backgroundColor = allState ? "red" : "#5e5ce0";
-    img.src = allState ? "assets/led-on.png" : "assets/led-off.png";
-  });
-
-  // update tombol ALL
-  const btnAll = document.getElementById("btn-all");
-  btnAll.textContent = allState ? "Matikan Semua" : "Hidupkan Semua";
-  btnAll.style.backgroundColor = allState ? "red" : "#5e5ce0";
-  btnAll.style.color = "white";
+      setTimeout(() => {
+        syncAllLamps();
+        updateAllButtonFromState();
+      }, 200);
+    });
 }
 
-function postTo(path) {
-  fetch(`${BASE_URL}/${path}`, { method: "POST" });
-}
-
+/* =========================
+   POST
+========================= */
 function postTo(path) {
   return fetch(`${BASE_URL}/${path}`, { method: "POST" })
     .then(res => res.text());
 }
 
+/* =========================
+   TOGGLE SATU LAMPU
+========================= */
 function toggle(btnId, imgId, path) {
   const btn = document.getElementById(btnId);
   const img = document.getElementById(imgId);
 
   postTo(path).then(result => {
-    if (result.trim() === "ON") {
-      btn.textContent = "HIDUP";
-      btn.style.backgroundColor = "red";
-      img.src = "assets/led-on.png";
-    } else {
-      btn.textContent = "MATI";
-      btn.style.backgroundColor = "#5e5ce0";
-      img.src = "assets/led-off.png";
-    }
+    const on = result.trim() === "ON";
+
+    btn.textContent = on ? "HIDUP" : "MATI";
+    btn.style.backgroundColor = on ? "red" : "#5e5ce0";
+    img.src = on ? "assets/led-on.png" : "assets/led-off.png";
+
+    if (on) btn.classList.add("active");
+    else btn.classList.remove("active");
   });
 }
 
@@ -62,3 +55,66 @@ function setToiletLed() { toggle("btn-toilet", "img-toilet", "toilet"); }
 function setTerasLed()  { toggle("btn-teras",  "img-teras",  "teras"); }
 function setGudangLed() { toggle("btn-gudang", "img-gudang", "gudang"); }
 
+/* =========================
+   LDR
+========================= */
+function fetchLDR() {
+  fetch(`${BASE_URL}/ldr`)
+    .then(res => res.text())
+    .then(value => {
+      document.getElementById("ldrValue").textContent = value;
+    });
+}
+setInterval(fetchLDR, 700);
+
+/* =========================
+   SYNC SATU LAMPU
+========================= */
+function syncLamp(lamp) {
+  fetch(`${BASE_URL}/${lamp}`)
+    .then(res => res.text())
+    .then(state => {
+      const btn = document.getElementById(`btn-${lamp}`);
+      const img = document.getElementById(`img-${lamp}`);
+      const on = state.trim() === "ON";
+
+      btn.textContent = on ? "HIDUP" : "MATI";
+      btn.style.backgroundColor = on ? "red" : "#5e5ce0";
+      img.src = on ? "assets/led-on.png" : "assets/led-off.png";
+
+      if (on) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+}
+
+/* =========================
+   UPDATE TOMBOL ALL
+   (HANYA DIPANGGIL DARI toggleAll)
+========================= */
+function updateAllButtonFromState() {
+  Promise.all(
+    lamps.map(l =>
+      fetch(`${BASE_URL}/${l}`)
+        .then(r => r.text())
+        .then(s => s.trim() === "ON")
+    )
+  ).then(states => {
+    const allOn = states.every(Boolean);
+    const btnAll = document.getElementById("btn-all");
+
+    btnAll.textContent = allOn ? "Matikan Semua" : "Hidupkan Semua";
+    btnAll.style.backgroundColor = allOn ? "red" : "#5e5ce0";
+
+    if (allOn) btnAll.classList.add("active");
+    else btnAll.classList.remove("active");
+  });
+}
+
+/* =========================
+   SYNC SEMUA LAMPU (TANPA ALL)
+========================= */
+function syncAllLamps() {
+  lamps.forEach(syncLamp);
+}
+
+setInterval(syncAllLamps, 500);
